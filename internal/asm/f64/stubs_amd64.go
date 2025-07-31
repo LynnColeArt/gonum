@@ -42,14 +42,14 @@ func Add(dst, s []float64)
 //	for i, v := range x {
 //		y[i] += alpha * v
 //	}
-func AxpyUnitary(alpha float64, x, y []float64)
+// func AxpyUnitary(alpha float64, x, y []float64) // Implemented in axpy_amd64.go
 
 // AxpyUnitaryTo is
 //
 //	for i, v := range x {
 //		dst[i] = alpha*v + y[i]
 //	}
-func AxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
+// func AxpyUnitaryTo(dst []float64, alpha float64, x, y []float64) // Implemented in axpy_amd64.go
 
 // AxpyInc is
 //
