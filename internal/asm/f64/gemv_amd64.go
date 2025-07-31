@@ -20,8 +20,7 @@ func gemvNSSE2(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float6
 func GemvNAVX2(m, n uintptr, alpha float64, a []float64, lda uintptr, x []float64, incX uintptr, beta float64, y []float64, incY uintptr)
 
 func init() {
-	// Temporarily disable AVX2 until we handle negative increments
-	if false && cpu.X86.HasAVX2 && cpu.X86.HasFMA {
+	if cpu.X86.HasAVX2 && cpu.X86.HasFMA {
 		gemvNImpl = GemvNAVX2
 		hasGemvAVX2 = true
 	} else {
