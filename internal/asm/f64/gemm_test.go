@@ -93,6 +93,54 @@ func TestGemmKernel4x4Accumulate(t *testing.T) {
 	}
 }
 
+// TestGemmKernel8x8 tests the 8x8 GEMM micro-kernel
+func TestGemmKernel8x8(t *testing.T) {
+	// Test case: 8x4 * 4x8 = 8x8
+	k := 4
+	
+	// A matrix (8x4)
+	a := []float64{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+		17, 18, 19, 20,
+		21, 22, 23, 24,
+		25, 26, 27, 28,
+		29, 30, 31, 32,
+	}
+	
+	// B matrix (4x8) - identity-like for easy verification
+	b := []float64{
+		1, 0, 0, 0, 1, 0, 0, 0,
+		0, 1, 0, 0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0, 0, 1, 0,
+		0, 0, 0, 1, 0, 0, 0, 1,
+	}
+	
+	// C matrix (8x8) - initialized to zero
+	c := make([]float64, 64)
+	
+	// Call the kernel
+	GemmKernel8x8(&a[0], &b[0], &c[0], k, 4, 8, 8)
+	
+	// Expected: each row of A appears twice in C
+	// Row 0: [1,2,3,4, 1,2,3,4]
+	// Row 1: [5,6,7,8, 5,6,7,8]
+	// etc.
+	for i := 0; i < 8; i++ {
+		for j := 0; j < 4; j++ {
+			expected := a[i*4+j]
+			if math.Abs(c[i*8+j]-expected) > 1e-14 {
+				t.Errorf("GemmKernel8x8: c[%d,%d] = %f, want %f", i, j, c[i*8+j], expected)
+			}
+			if math.Abs(c[i*8+j+4]-expected) > 1e-14 {
+				t.Errorf("GemmKernel8x8: c[%d,%d] = %f, want %f", i, j+4, c[i*8+j+4], expected)
+			}
+		}
+	}
+}
+
 // BenchmarkGemmKernel4x4 benchmarks the 4x4 kernel
 func BenchmarkGemmKernel4x4(b *testing.B) {
 	sizes := []int{4, 8, 16, 32, 64, 128}
@@ -117,6 +165,35 @@ func BenchmarkGemmKernel4x4(b *testing.B) {
 			
 			for i := 0; i < b.N; i++ {
 				GemmKernel4x4(&a[0], &bm[0], &c[0], k, k, 4, 4)
+			}
+		})
+	}
+}
+
+// BenchmarkGemmKernel8x8 benchmarks the 8x8 kernel
+func BenchmarkGemmKernel8x8(b *testing.B) {
+	sizes := []int{8, 16, 32, 64, 128, 256}
+	
+	for _, k := range sizes {
+		b.Run("K"+fmt.Sprintf("%d", k), func(b *testing.B) {
+			// Create matrices
+			a := make([]float64, 8*k)
+			bm := make([]float64, k*8)
+			c := make([]float64, 64)
+			
+			// Initialize with some data
+			for i := range a {
+				a[i] = float64(i)
+			}
+			for i := range bm {
+				bm[i] = float64(i)
+			}
+			
+			b.ResetTimer()
+			b.SetBytes(int64(8*k + k*8 + 64) * 8) // Total memory touched
+			
+			for i := 0; i < b.N; i++ {
+				GemmKernel8x8(&a[0], &bm[0], &c[0], k, k, 8, 8)
 			}
 		})
 	}
