@@ -115,7 +115,7 @@ func DivTo(dst, x, y []float64) []float64
 //		sum += y[i] * v
 //	}
 //	return sum
-func DotUnitary(x, y []float64) (sum float64)
+// func DotUnitary(x, y []float64) (sum float64) // Implemented in dot_amd64.go
 
 // DotInc is
 //
@@ -157,7 +157,7 @@ func LinfDist(s, t []float64) float64
 //	for i := range x {
 //		x[i] *= alpha
 //	}
-func ScalUnitary(alpha float64, x []float64)
+// func ScalUnitary(alpha float64, x []float64) // Implemented in scal_amd64.go
 
 // ScalUnitaryTo is
 //
